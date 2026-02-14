@@ -20,3 +20,9 @@ sms:
     connect-timeout-ms: 3000
     read-timeout-ms: 5000
     write-timeout-ms: 5000
+
+appliance:
+  cloud-account:
+    account-ak: demo-ak
+    account-sk: demo-sk
+    domain: sms.cn-north-4.myhuaweicloud.com

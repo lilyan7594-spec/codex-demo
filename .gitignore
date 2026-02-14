@@ -1,3 +1,11 @@
 target/
 .idea/
 *.iml
+src/main/java/com/example/demo/api/ApiUtil.java
+src/main/java/com/example/demo/api/ApplianceApi.java
+src/main/java/com/example/demo/api/model/RegisterApplianceData.java
+src/main/java/com/example/demo/api/model/RegisterApplianceRequest.java
+src/main/java/com/example/demo/api/model/RegisterApplianceResponse.java
+src/main/java/com/example/demo/service/ApplianceRegistrationService.java
+src/main/resources/application.yml
+src/main/resources/openapi/appliance-api.yml

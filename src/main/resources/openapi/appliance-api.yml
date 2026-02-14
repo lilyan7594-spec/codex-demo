@@ -16,7 +16,7 @@ paths:
         - appliance
       summary: Register appliance instance
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -32,27 +32,10 @@ components:
   schemas:
     RegisterApplianceRequest:
       type: object
-      required:
-        - account_ak
-        - account_sk
-        - domain
       properties:
-        account_ak:
-          type: string
-          minLength: 1
-        account_sk:
-          type: string
-          minLength: 1
-        domain:
-          type: string
-          minLength: 1
-        hostname:
-          type: string
-        ip:
-          type: string
-        instance_fingerprint:
-          type: string
-          description: Optional. When empty, appliance will generate one.
+        force:
+          type: boolean
+          description: Optional. Whether to force a fresh registration attempt.
     RegisterApplianceResponse:
       type: object
       required:

@@ -6,51 +6,66 @@ import com.example.demo.api.model.RegisterApplianceRequest;
 import com.example.demo.util.FingerprintUtil;
 import com.example.demo.util.LocalIpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
 import java.util.Objects;
 
 /**
- * Appliance 注册业务服务，负责参数处理与调用外部注册接口。
+ * Appliance 注册业务服务，负责组装本机信息并调用外部注册接口。
  */
 @Service
 public class ApplianceRegistrationService {
 
     private final SmsApi smsApi;
+    private final String accountAk;
+    private final String accountSk;
+    private final String cloudDomain;
 
     /**
      * 构造注册服务。
      *
      * @param smsApi 外部注册调用组件
+     * @param accountAk 本地保存的云账号 AK
+     * @param accountSk 本地保存的云账号 SK
+     * @param cloudDomain 云服务域名
      */
     @Autowired
-    public ApplianceRegistrationService(SmsApi smsApi) {
+    public ApplianceRegistrationService(
+            SmsApi smsApi,
+            @Value("${appliance.cloud-account.account-ak}") String accountAk,
+            @Value("${appliance.cloud-account.account-sk}") String accountSk,
+            @Value("${appliance.cloud-account.domain}") String cloudDomain
+    ) {
         this.smsApi = smsApi;
+        this.accountAk = accountAk;
+        this.accountSk = accountSk;
+        this.cloudDomain = cloudDomain;
     }
 
     /**
      * 注册 Appliance 实例。
      *
-     * @param request 注册请求
+     * @param request 前端触发请求（当前仅保留 force，可选）
      * @return 注册结果
      */
     public RegisterResult register(RegisterApplianceRequest request) {
-        validateRequired(request);
-        String domain = request.getDomain().trim();
-        String fingerprint = resolveFingerprint(request, domain);
-        String ip = resolveIp(request, domain);
-        String hostname = request.getHostname() == null ? "" : request.getHostname().trim();
+        validateConfig();
+        String domain = cloudDomain.trim();
+        String fingerprint = FingerprintUtil.generate(domain);
+        String ip = resolveIp(domain);
+        String hostname = resolveHostname();
 
         SmsApi.SmsRegisterRequest outboundRequest = new SmsApi.SmsRegisterRequest(
-                request.getAccountAk().trim(),
-                request.getAccountSk().trim(),
+                accountAk.trim(),
+                accountSk.trim(),
                 domain,
                 fingerprint,
                 hostname,
                 ip
         );
         SmsApi.SmsRegisterResponse outboundResponse = smsApi.register(outboundRequest);
-
         return new RegisterResult(outboundResponse.applianceId(), outboundResponse.isNew(), ip, fingerprint);
     }
 
@@ -67,57 +82,46 @@ public class ApplianceRegistrationService {
     }
 
     /**
-     * 校验请求必填字段。
-     *
-     * @param request 注册请求
+     * 校验本地配置合法性。
      */
-    private static void validateRequired(RegisterApplianceRequest request) {
-        if (request.getAccountAk() == null || request.getAccountAk().isBlank()) {
-            throw new IllegalArgumentException("account_ak is required");
+    private void validateConfig() {
+        if (accountAk == null || accountAk.isBlank()) {
+            throw new IllegalArgumentException("appliance.cloud-account.account-ak is required");
         }
-        if (request.getAccountSk() == null || request.getAccountSk().isBlank()) {
-            throw new IllegalArgumentException("account_sk is required");
+        if (accountSk == null || accountSk.isBlank()) {
+            throw new IllegalArgumentException("appliance.cloud-account.account-sk is required");
         }
-        if (request.getDomain() == null || request.getDomain().isBlank()) {
-            throw new IllegalArgumentException("domain is required");
+        if (cloudDomain == null || cloudDomain.isBlank()) {
+            throw new IllegalArgumentException("appliance.cloud-account.domain is required");
         }
     }
 
     /**
-     * 优先使用请求中的指纹，否则在本地生成指纹。
+     * 解析注册上报 IP：优先出口 IP，最后内网网卡兜底。
      *
-     * @param request 注册请求
-     * @param domain 云服务域名
-     * @return 标准化后的指纹
-     */
-    private static String resolveFingerprint(RegisterApplianceRequest request, String domain) {
-        if (request.getInstanceFingerprint() != null && !request.getInstanceFingerprint().isBlank()) {
-            String provided = request.getInstanceFingerprint().trim().toLowerCase();
-            if (!provided.matches("^[0-9a-f]{64}$")) {
-                throw new IllegalArgumentException("instance_fingerprint must be 64-char hex");
-            }
-            return provided;
-        }
-        return FingerprintUtil.generate(domain);
-    }
-
-    /**
-     * 解析注册上报 IP：优先请求字段，其次出口 IP，最后内网网卡兜底。
-     *
-     * @param request 注册请求
      * @param domain 云服务域名
      * @return 解析得到的 IP，失败时返回空字符串
      */
-    private static String resolveIp(RegisterApplianceRequest request, String domain) {
-        if (request.getIp() != null && !request.getIp().isBlank()) {
-            return request.getIp().trim();
-        }
+    private static String resolveIp(String domain) {
         String outboundIp = LocalIpUtil.resolveOutboundIp(domain, 443);
         if (outboundIp != null && !outboundIp.isBlank()) {
             return outboundIp;
         }
         String fallback = LocalIpUtil.resolveLanIpv4();
         return Objects.requireNonNullElse(fallback, "");
+    }
+
+    /**
+     * 解析本机主机名。
+     *
+     * @return 主机名，失败时返回空字符串
+     */
+    private static String resolveHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     /**

@@ -5,6 +5,7 @@
  */
 package com.example.demo.api;
 
+import org.springframework.lang.Nullable;
 import com.example.demo.api.model.RegisterApplianceRequest;
 import com.example.demo.api.model.RegisterApplianceResponse;
 import org.springframework.http.HttpStatus;
@@ -22,15 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-02-14T14:32:48.708622200+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-02-14T17:10:22.418536+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
 @Validated
 public interface ApplianceApi {
 
-    /**
-     * 返回原生 Web 请求对象（用于生成代码默认逻辑）。
-     *
-     * @return 可选的原生请求对象
-     */
     default Optional<NativeWebRequest> getRequest() {
         return Optional.empty();
     }
@@ -39,7 +35,7 @@ public interface ApplianceApi {
     /**
      * POST /api/v1/appliances/register : Register appliance instance
      *
-     * @param registerApplianceRequest  (required)
+     * @param registerApplianceRequest  (optional)
      * @return Register result (status code 200)
      */
     @RequestMapping(
@@ -49,7 +45,7 @@ public interface ApplianceApi {
         consumes = { "application/json" }
     )
     default ResponseEntity<RegisterApplianceResponse> registerAppliance(
-         @Valid @RequestBody RegisterApplianceRequest registerApplianceRequest
+         @Valid @RequestBody(required = false) @Nullable RegisterApplianceRequest registerApplianceRequest
     ) {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {

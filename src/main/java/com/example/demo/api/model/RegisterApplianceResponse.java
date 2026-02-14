@@ -18,7 +18,7 @@ import jakarta.annotation.Generated;
  * RegisterApplianceResponse
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-02-14T14:32:48.708622200+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-02-14T17:10:22.418536+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
 public class RegisterApplianceResponse {
 
   private String code;
@@ -27,15 +27,12 @@ public class RegisterApplianceResponse {
 
   private RegisterApplianceData data;
 
-  /**
-   * Default constructor.
-   */
   public RegisterApplianceResponse() {
     super();
   }
 
   /**
-   * 仅包含必填参数的构造函数。
+   * Constructor with only required parameters
    */
   public RegisterApplianceResponse(String code, String message, RegisterApplianceData data) {
     this.code = code;
@@ -43,21 +40,14 @@ public class RegisterApplianceResponse {
     this.data = data;
   }
 
-  /**
-   * 链式设置 code。
-   *
-   * @param code 响应码
-   * @return 当前对象
-   */
   public RegisterApplianceResponse code(String code) {
     this.code = code;
     return this;
   }
 
   /**
-   * 获取 code。
-   *
-   * @return 响应码
+   * Get code
+   * @return code
    */
   @NotNull 
   @JsonProperty("code")
@@ -65,30 +55,18 @@ public class RegisterApplianceResponse {
     return code;
   }
 
-  /**
-   * 设置 code。
-   *
-   * @param code 响应码
-   */
   public void setCode(String code) {
     this.code = code;
   }
 
-  /**
-   * 链式设置 message。
-   *
-   * @param message 响应消息
-   * @return 当前对象
-   */
   public RegisterApplianceResponse message(String message) {
     this.message = message;
     return this;
   }
 
   /**
-   * 获取 message。
-   *
-   * @return 响应消息
+   * Get message
+   * @return message
    */
   @NotNull 
   @JsonProperty("message")
@@ -96,30 +74,18 @@ public class RegisterApplianceResponse {
     return message;
   }
 
-  /**
-   * 设置 message。
-   *
-   * @param message 响应消息
-   */
   public void setMessage(String message) {
     this.message = message;
   }
 
-  /**
-   * 链式设置 data。
-   *
-   * @param data 响应数据
-   * @return 当前对象
-   */
   public RegisterApplianceResponse data(RegisterApplianceData data) {
     this.data = data;
     return this;
   }
 
   /**
-   * 获取 data。
-   *
-   * @return 响应数据
+   * Get data
+   * @return data
    */
   @NotNull @Valid 
   @JsonProperty("data")
@@ -127,21 +93,10 @@ public class RegisterApplianceResponse {
     return data;
   }
 
-  /**
-   * 设置 data。
-   *
-   * @param data 响应数据
-   */
   public void setData(RegisterApplianceData data) {
     this.data = data;
   }
 
-  /**
-   * 比较当前对象与目标对象是否相等。
-   *
-   * @param o 目标对象
-   * @return 所有字段相等时返回 true
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -156,21 +111,11 @@ public class RegisterApplianceResponse {
         Objects.equals(this.data, registerApplianceResponse.data);
   }
 
-  /**
-   * 计算当前对象哈希值。
-   *
-   * @return 哈希值
-   */
   @Override
   public int hashCode() {
     return Objects.hash(code, message, data);
   }
 
-  /**
-   * 生成调试用字符串。
-   *
-   * @return 可读字符串
-   */
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -183,7 +128,8 @@ public class RegisterApplianceResponse {
   }
 
   /**
-   * 将对象转为字符串，并在换行后增加缩进（首行除外）。
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
    */
   private String toIndentedString(@Nullable Object o) {
     if (o == null) {
@@ -192,3 +138,4 @@ public class RegisterApplianceResponse {
     return o.toString().replace("\n", "\n    ");
   }
 }
+
