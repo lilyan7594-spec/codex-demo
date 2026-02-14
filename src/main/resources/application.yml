@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: demo
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+sms:
+  api:
+    host: localhost
+    port: 9000
+    register-path: /api/v1/appliances/register
+    connect-timeout-ms: 3000
+    read-timeout-ms: 5000
+    write-timeout-ms: 5000

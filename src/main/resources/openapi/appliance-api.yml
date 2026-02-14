@@ -1,0 +1,81 @@
+openapi: 3.0.3
+info:
+  title: Appliance Client API
+  version: 1.0.0
+  description: Appliance side registration API
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: appliance
+    description: Appliance operations
+paths:
+  /api/v1/appliances/register:
+    post:
+      operationId: registerAppliance
+      tags:
+        - appliance
+      summary: Register appliance instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterApplianceRequest'
+      responses:
+        '200':
+          description: Register result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterApplianceResponse'
+components:
+  schemas:
+    RegisterApplianceRequest:
+      type: object
+      required:
+        - account_ak
+        - account_sk
+        - domain
+      properties:
+        account_ak:
+          type: string
+          minLength: 1
+        account_sk:
+          type: string
+          minLength: 1
+        domain:
+          type: string
+          minLength: 1
+        hostname:
+          type: string
+        ip:
+          type: string
+        instance_fingerprint:
+          type: string
+          description: Optional. When empty, appliance will generate one.
+    RegisterApplianceResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          example: "0"
+        message:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/RegisterApplianceData'
+    RegisterApplianceData:
+      type: object
+      required:
+        - appliance_id
+        - is_new
+      properties:
+        appliance_id:
+          type: string
+          example: appl_8f8f7f22884f4f5fb0ea4fda5f5d6f8d
+        is_new:
+          type: boolean

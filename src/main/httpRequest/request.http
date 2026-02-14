@@ -1,0 +1,13 @@
+### 健康检查
+GET http://localhost:8080/hello
+
+### 测试 show-cloud-config
+POST http://localhost:8080/show-cloud-config
+Content-Type: application/json
+
+{
+  "account_ak": "HPUAXGJCVEWN9ZGBP6YC",
+  "account_sk": "9e93g253yw6Agd4Q2lpWcB8PCCaZniVYiKJ8IDiR",
+  "sms_endpoint": "sms.cn-north-4.myhuaweicloud.com"
+}
+
