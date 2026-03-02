@@ -17,28 +17,39 @@ import jakarta.annotation.Generated;
  * RegisterApplianceRequest
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-02-14T17:10:22.418536+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-03-02T09:31:43.352578+08:00[Asia/Shanghai]", comments = "Generator version: 7.19.0")
 public class RegisterApplianceRequest {
 
-  private @Nullable Boolean force;
+  private String applianceName;
 
-  public RegisterApplianceRequest force(@Nullable Boolean force) {
-    this.force = force;
+  public RegisterApplianceRequest() {
+    super();
+  }
+
+  /**
+   * Constructor with only required parameters
+   */
+  public RegisterApplianceRequest(String applianceName) {
+    this.applianceName = applianceName;
+  }
+
+  public RegisterApplianceRequest applianceName(String applianceName) {
+    this.applianceName = applianceName;
     return this;
   }
 
   /**
-   * Optional. Whether to force a fresh registration attempt.
-   * @return force
+   * Get applianceName
+   * @return applianceName
    */
-  
-  @JsonProperty("force")
-  public @Nullable Boolean getForce() {
-    return force;
+  @NotNull @Size(min = 1, max = 128) 
+  @JsonProperty("appliance_name")
+  public String getApplianceName() {
+    return applianceName;
   }
 
-  public void setForce(@Nullable Boolean force) {
-    this.force = force;
+  public void setApplianceName(String applianceName) {
+    this.applianceName = applianceName;
   }
 
   @Override
@@ -50,19 +61,19 @@ public class RegisterApplianceRequest {
       return false;
     }
     RegisterApplianceRequest registerApplianceRequest = (RegisterApplianceRequest) o;
-    return Objects.equals(this.force, registerApplianceRequest.force);
+    return Objects.equals(this.applianceName, registerApplianceRequest.applianceName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(force);
+    return Objects.hash(applianceName);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegisterApplianceRequest {\n");
-    sb.append("    force: ").append(toIndentedString(force)).append("\n");
+    sb.append("    applianceName: ").append(toIndentedString(applianceName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

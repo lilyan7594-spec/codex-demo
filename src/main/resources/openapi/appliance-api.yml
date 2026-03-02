@@ -16,7 +16,7 @@ paths:
         - appliance
       summary: Register appliance instance
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
@@ -32,10 +32,13 @@ components:
   schemas:
     RegisterApplianceRequest:
       type: object
+      required:
+        - appliance_name
       properties:
-        force:
-          type: boolean
-          description: Optional. Whether to force a fresh registration attempt.
+        appliance_name:
+          type: string
+          minLength: 1
+          maxLength: 128
     RegisterApplianceResponse:
       type: object
       required:

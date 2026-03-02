@@ -3,13 +3,13 @@ package com.example.demo;
 import com.example.demo.exception.UpstreamApiException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.HttpUrl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.time.Duration;
 
 /**
- * 封装外部注册接口调用：创建客户端、发送请求、解析响应。
+ * 封装云端注册接口调用：创建客户端、发送请求、解析响应。
  */
 @Service
 public class SmsApi {
@@ -32,15 +32,15 @@ public class SmsApi {
     private final String registerPath;
 
     /**
-     * 构造 SmsApi，并在初始化阶段创建 OkHttpClient。
+     * 构造 SmsApi，并初始化 OkHttpClient。
      *
      * @param objectMapper JSON 序列化组件
      * @param host 云服务主机
      * @param port 云服务端口
      * @param registerPath 注册接口路径
-     * @param connectTimeoutMs 连接超时时间（毫秒）
-     * @param readTimeoutMs 读取超时时间（毫秒）
-     * @param writeTimeoutMs 写入超时时间（毫秒）
+     * @param connectTimeoutMs 连接超时毫秒
+     * @param readTimeoutMs 读取超时毫秒
+     * @param writeTimeoutMs 写入超时毫秒
      */
     @Autowired
     public SmsApi(
@@ -60,10 +60,10 @@ public class SmsApi {
     }
 
     /**
-     * 调用外部注册接口。
+     * 调用云端注册接口。
      *
-     * @param request 外部注册请求
-     * @return 外部注册响应
+     * @param request 注册请求体
+     * @return 注册响应
      */
     public SmsRegisterResponse register(SmsRegisterRequest request) {
         try {
@@ -90,7 +90,7 @@ public class SmsApi {
      * @param connectTimeoutMs 连接超时毫秒
      * @param readTimeoutMs 读取超时毫秒
      * @param writeTimeoutMs 写入超时毫秒
-     * @return OkHttpClient 实例
+     * @return OkHttpClient
      */
     private OkHttpClient buildClient(long connectTimeoutMs, long readTimeoutMs, long writeTimeoutMs) {
         return new OkHttpClient.Builder()
@@ -101,24 +101,23 @@ public class SmsApi {
     }
 
     /**
-     * 组装注册接口完整 URL。
+     * 组装注册接口 URL。
      *
-     * @return 完整注册 URL
+     * @return 完整 URL
      */
     private HttpUrl buildRegisterUrl() {
-        HttpUrl url = new HttpUrl.Builder()
+        return new HttpUrl.Builder()
                 .scheme("http")
                 .host(host)
                 .port(port)
                 .addPathSegments(trimLeadingSlash(registerPath))
                 .build();
-        return url;
     }
 
     /**
-     * 去除路径前导斜杠，避免 PathSegments 拼接异常。
+     * 去掉路径前导斜杠，避免路径拼接异常。
      *
-     * @param path 接口路径
+     * @param path 配置路径
      * @return 处理后的路径
      */
     private String trimLeadingSlash(String path) {
@@ -133,10 +132,10 @@ public class SmsApi {
     }
 
     /**
-     * 解析外部 HTTP 响应。
+     * 解析云端响应。
      *
      * @param response HTTP 响应
-     * @return 标准化注册响应
+     * @return 标准化响应
      */
     private SmsRegisterResponse parseResponse(Response response) {
         if (!response.isSuccessful()) {
@@ -152,8 +151,10 @@ public class SmsApi {
                 throw new UpstreamApiException("A500_PARSE_ERROR", "外部注册接口响应格式错误");
             }
             if (!"0".equals(remote.code)) {
-                throw new UpstreamApiException(remote.code == null ? "A503" : remote.code,
-                        remote.message == null ? "外部注册接口业务失败" : remote.message);
+                throw new UpstreamApiException(
+                        remote.code == null ? "A503" : remote.code,
+                        remote.message == null ? "外部注册接口业务失败" : remote.message
+                );
             }
             return new SmsRegisterResponse(remote.data.applianceId, Boolean.TRUE.equals(remote.data.isNew));
         } catch (IOException ex) {
@@ -162,54 +163,38 @@ public class SmsApi {
     }
 
     /**
-     * 外部注册请求 DTO。
+     * 云端注册请求 DTO。
      */
     public record SmsRegisterRequest(
             @JsonProperty("account_ak") String accountAk,
             @JsonProperty("account_sk") String accountSk,
             @JsonProperty("domain") String domain,
             @JsonProperty("instance_fingerprint") String instanceFingerprint,
-            @JsonProperty("hostname") String hostname,
-            @JsonProperty("ip") String ip
+            @JsonProperty("appliance_name") String applianceName
     ) {
     }
 
     /**
-     * 外部注册响应 DTO（标准化后）。
+     * 云端注册响应 DTO（标准化后）。
      */
     public record SmsRegisterResponse(String applianceId, boolean isNew) {
     }
 
     /**
-     * 外部原始响应模型。
+     * 云端原始响应模型。
      */
     private static class RemoteRegisterResponse {
-        /**
-         * 响应码。
-         */
         public String code;
-        /**
-         * 响应信息。
-         */
         public String message;
-        /**
-         * 响应数据。
-         */
         public RemoteRegisterData data;
     }
 
     /**
-     * 外部原始响应数据模型。
+     * 云端原始响应数据模型。
      */
     private static class RemoteRegisterData {
-        /**
-         * Appliance 唯一标识。
-         */
         @JsonProperty("appliance_id")
         public String applianceId;
-        /**
-         * 是否新建。
-         */
         @JsonProperty("is_new")
         public Boolean isNew;
     }

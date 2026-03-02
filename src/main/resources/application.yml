@@ -16,7 +16,7 @@ sms:
   api:
     host: localhost
     port: 9000
-    register-path: /api/v1/appliances/register
+    register-path: /v3/appliance/register
     connect-timeout-ms: 3000
     read-timeout-ms: 5000
     write-timeout-ms: 5000

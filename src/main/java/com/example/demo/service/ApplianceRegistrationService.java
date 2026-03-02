@@ -4,16 +4,12 @@ import com.example.demo.SmsApi;
 import com.example.demo.api.model.RegisterApplianceData;
 import com.example.demo.api.model.RegisterApplianceRequest;
 import com.example.demo.util.FingerprintUtil;
-import com.example.demo.util.LocalIpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.util.Objects;
-
 /**
- * Appliance 注册业务服务，负责组装本机信息并调用外部注册接口。
+ * Appliance 注册业务服务，负责组装参数并调用云端注册接口。
  */
 @Service
 public class ApplianceRegistrationService {
@@ -26,7 +22,7 @@ public class ApplianceRegistrationService {
     /**
      * 构造注册服务。
      *
-     * @param smsApi 外部注册调用组件
+     * @param smsApi 云端注册调用组件
      * @param accountAk 本地保存的云账号 AK
      * @param accountSk 本地保存的云账号 SK
      * @param cloudDomain 云服务域名
@@ -47,26 +43,27 @@ public class ApplianceRegistrationService {
     /**
      * 注册 Appliance 实例。
      *
-     * @param request 前端触发请求（当前仅保留 force，可选）
+     * @param request 前端注册请求
      * @return 注册结果
      */
     public RegisterResult register(RegisterApplianceRequest request) {
         validateConfig();
+        validateRequest(request);
+
         String domain = cloudDomain.trim();
         String fingerprint = FingerprintUtil.generate(domain);
-        String ip = resolveIp(domain);
-        String hostname = resolveHostname();
+        String applianceName = request.getApplianceName().trim();
 
         SmsApi.SmsRegisterRequest outboundRequest = new SmsApi.SmsRegisterRequest(
                 accountAk.trim(),
                 accountSk.trim(),
                 domain,
                 fingerprint,
-                hostname,
-                ip
+                applianceName
         );
+
         SmsApi.SmsRegisterResponse outboundResponse = smsApi.register(outboundRequest);
-        return new RegisterResult(outboundResponse.applianceId(), outboundResponse.isNew(), ip, fingerprint);
+        return new RegisterResult(outboundResponse.applianceId(), outboundResponse.isNew(), applianceName, fingerprint);
     }
 
     /**
@@ -97,30 +94,19 @@ public class ApplianceRegistrationService {
     }
 
     /**
-     * 解析注册上报 IP：优先出口 IP，最后内网网卡兜底。
+     * 校验前端请求参数。
      *
-     * @param domain 云服务域名
-     * @return 解析得到的 IP，失败时返回空字符串
+     * @param request 前端注册请求
      */
-    private static String resolveIp(String domain) {
-        String outboundIp = LocalIpUtil.resolveOutboundIp(domain, 443);
-        if (outboundIp != null && !outboundIp.isBlank()) {
-            return outboundIp;
+    private void validateRequest(RegisterApplianceRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("request body is required");
         }
-        String fallback = LocalIpUtil.resolveLanIpv4();
-        return Objects.requireNonNullElse(fallback, "");
-    }
-
-    /**
-     * 解析本机主机名。
-     *
-     * @return 主机名，失败时返回空字符串
-     */
-    private static String resolveHostname() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (Exception ignored) {
-            return "";
+        if (request.getApplianceName() == null || request.getApplianceName().isBlank()) {
+            throw new IllegalArgumentException("appliance_name is required");
+        }
+        if (request.getApplianceName().trim().length() > 128) {
+            throw new IllegalArgumentException("appliance_name length must be <= 128");
         }
     }
 
@@ -129,9 +115,9 @@ public class ApplianceRegistrationService {
      *
      * @param applianceId Appliance 标识
      * @param isNew 是否为新建
-     * @param ip 注册时上报 IP
+     * @param applianceName 设备名称
      * @param instanceFingerprint 实例指纹
      */
-    public record RegisterResult(String applianceId, boolean isNew, String ip, String instanceFingerprint) {
+    public record RegisterResult(String applianceId, boolean isNew, String applianceName, String instanceFingerprint) {
     }
 }

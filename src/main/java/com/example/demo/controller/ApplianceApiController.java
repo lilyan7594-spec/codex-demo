@@ -26,7 +26,7 @@ public class ApplianceApiController implements ApplianceApi {
     /**
      * 处理 Appliance 注册请求。
      *
-     * @param registerApplianceRequest 注册请求体
+     * @param registerApplianceRequest 前端请求体（包含 appliance_name）
      * @return 注册响应
      */
     @Override
